@@ -89,6 +89,9 @@ test: test_stack jit0-x64 jit0-arm
 test_stack: tests/test_stack.c
 	$(CC) $(CFLAGS) -o $@ $^
 
+plot: out.txt
+	gnuplot scripts/runtime.gp
+
 clean:
 	$(RM) $(BIN) \
 	      hello-x86 hello-x64 hello-arm hello.s \

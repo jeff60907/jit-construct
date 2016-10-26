@@ -60,6 +60,10 @@ int main(int argc, char *argv[])
 			break;
 		case '[':
 			if (top == limit) err("Nesting too deep.");
+			if(*(p+1)== '-' && *(p+2) == ']') {
+			|  mov   byte [PTR], 0
+			//break;
+			}
 			// Each loop gets two pclabels: at the beginning and end.
 			// We store pclabel offsets in a stack to link the loop
 			// begin and end together.
