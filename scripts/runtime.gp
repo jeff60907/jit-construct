@@ -2,7 +2,7 @@ reset
 set ylabel 'time(sec)'
 
 set style fill solid
-set key left title'clear loop'
+set key left title'Contraction + clear loop'
 set title 'perfomance comparison'
 set term png enhanced font 'Verdana,10'
 set output 'runtime.png'

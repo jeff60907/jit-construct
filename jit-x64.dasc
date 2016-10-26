@@ -22,6 +22,16 @@
 #define Dst &state
 #define MAX_NESTING 256
 
+int continuous_count(char *p)
+{
+    char *ptr = p;
+    int count = 0;
+    while (*ptr == *p) {
+        count++;
+        ptr++;
+    }
+    return count;
+}
 int main(int argc, char *argv[])
 {
 	if (argc < 2) err("Usage: jit-x64 <inputfile>");
@@ -31,7 +41,7 @@ int main(int argc, char *argv[])
 	unsigned int maxpc = 0;
 	int pcstack[MAX_NESTING];
 	int *top = pcstack, *limit = pcstack + MAX_NESTING;
-
+	int count = 0;
 	// Function prologue.
 	|  push PTR
 	|  mov  PTR, rdi      // rdi store 1st argument
@@ -39,16 +49,25 @@ int main(int argc, char *argv[])
 	for (char *p = read_file(argv[1]); *p; p++) {
 		switch (*p) {
 		case '>':
-			|  inc  PTR
+			count = continuous_count(p);
+                        p += count -1;
+			|  add PTR, count
 			break;
 		case '<':
-			|  dec  PTR
+			count = continuous_count(p);
+                        p += count -1;
+                        |  sub PTR, count
 			break;
 		case '+':
-			|  inc  byte [PTR]
+			count = continuous_count(p);
+			p += count -1;
+			|  add  byte [PTR], count
 			break;
 		case '-':
-			|  dec  byte [PTR]
+			count = continuous_count(p);
+                        p += count -1;
+			|  sub  byte [PTR], count
+			//|  dec  byte [PTR]
 			break;
 		case '.':
 			|  movzx edi, byte [PTR]
@@ -60,13 +79,15 @@ int main(int argc, char *argv[])
 			break;
 		case '[':
 			if (top == limit) err("Nesting too deep.");
+
+			// Each loop gets two pclabels: at the beginning and end.
+			// We store pclabel offsets in a stack to link the loop
+			// begin and end together.
+			//clear loop
 			if(*(p+1)== '-' && *(p+2) == ']') {
 			|  mov   byte [PTR], 0
 			//break;
 			}
-			// Each loop gets two pclabels: at the beginning and end.
-			// We store pclabel offsets in a stack to link the loop
-			// begin and end together.
 			maxpc += 2;
 			*top++ = maxpc;
 			dasm_growpc(&state, maxpc);

@@ -1,3 +1,3 @@
-awib.b   112.7ms
-mandelbrot.b 2933.7ms
-hanoi.b       3023.9ms
+awib.b       	62.7ms
+mandelbrot.b 	1097.1ms
+hanoi.b        189.3ms
